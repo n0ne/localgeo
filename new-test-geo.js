@@ -9,6 +9,29 @@ if (Meteor.isClient) {
   insideMarkers = [];
   diffMarkers = [];
 
+
+
+  Router.map(function () {
+    this.route('home', {
+      path: '/',
+      template: 'map',
+      before: function() {
+        var handle = Meteor.subscribe('markers');
+        if(handle.ready()) {
+          NProgress.done();
+          console.log("handle.ready(): total markers: " + markers.length);
+          markersGroup.addLayers(markers);
+          map.addLayer(markersGroup);
+        } else {
+          NProgress.start();
+          this.stop();
+        }
+      }
+    });
+  });
+
+
+
   removeMarker = function(marker) {
 
     map.removeLayer(markersGroup);
@@ -84,11 +107,14 @@ if (Meteor.isClient) {
           icon: activeIcon
         }).on('click', function(e) {
           Session.set('location', [lng, lat]);
-          map.panTo(e.target.getLatLng());
+          console.log("Marker clicked. Location: " + Session.get('location'));
+
+          // map.panTo(e.target.getLatLng());
           // console.log("Total markers array size: " + markers.length);
           // console.log(e);
           // removeMarker(e.target.options._id);
-          map.removeLayer(markersGroup);
+
+          markersGroup.clearLayers(markers);
 
         });
 
@@ -112,11 +138,11 @@ if (Meteor.isClient) {
 
       }
     });
-    if(DDP._allSubscriptionsReady()) {
-      console.log("DDP: total markers: " + markers.length);
-      markersGroup.addLayers(markers);
-      map.addLayer(markersGroup);
-    }
+    // if(DDP._allSubscriptionsReady()) {
+    //   console.log("DDP: total markers: " + markers.length);
+    //   markersGroup.addLayers(markers);
+    //   map.addLayer(markersGroup);
+    // }
     console.log("Total markers: " + markers.length);
     Session.set('map', true)
   }
@@ -134,9 +160,13 @@ if (Meteor.isClient) {
   "click #clear": function(e, t) {
     e.preventDefault();
 
-    map.removeLayer(markersGroup);
+    // map.removeLayer(markersGroup);
 
-    Session.set('clear', true);
+    // Session.set('clear', true);
+    markersGroup.clearLayers(insideMarkers);
+
+    markersGroup.addLayers(markers);
+    map.addLayer(markersGroup);
   }
 });
 
@@ -145,37 +175,16 @@ if (Meteor.isClient) {
     // var location = null;
 
     Deps.autorun(function() {
-      // var isMap = Session.get('map');
-      // if(isMap) {
-        // radius    = Session.get('radius');
-        // diffMarkers = [];
 
         var location  = Session.get('location');
-        console.log(location);
-        // var nearMarkers = null;
-
-        // map.removeLayer(markersGroup);
-
-        markersGroupNew = L.markerClusterGroup({
-          maxClusterRadius: 100,
-          spiderfyOnMaxZoom: true,
-          showCoverageOnHover: false,
-          zoomToBoundsOnClick: true
-        });
-
-        var activeIcon;
-
-        activeIcon = L.icon({
-          iconUrl: "packages/leaflet/images/marker-icon.png",
-          shadowUrl: "packages/leaflet/images/marker-shadow.png",
-          iconAnchor: [16, 37]
-        });
+        console.log("From Deps.autorun: "+ location);
 
         if(location) {
-          console.log("New  location: " + location);
-          // console.log("Radius: " + radius);
-          
-          var nearMarkers = allMarkers.find({ location: {
+          insideMarkers =[];
+          console.log("From Deps.autorun. If statement.");
+
+          var nearMarkers = allMarkers.find({
+            location: {
               $near: {
                 $geometry: {
                   type: "Point",
@@ -183,129 +192,73 @@ if (Meteor.isClient) {
                 },
                 $maxDistance: 100
               }
-          }});
-          console.log("Total markers " + nearMarkers.count());
-          console.log(nearMarkers);
+            }
+          });
+
+          console.log("Total near markers " + nearMarkers.count());
 
           nearMarkers.forEach(function(m) {
-
             var lat = m.location.coordinates[1];
             var lng = m.location.coordinates[0];
+
+            console.log("Marker LatLng: " + [lat, lng]);
 
             var marker = new L.Marker([lat, lng], {
               _id: m._id,
               icon: activeIcon
-            }).on('click', function(e) {
-              Session.set('location', [lng, lat]);
-              map.panTo(e.target.getLatLng());
-              // console.log("Total markers array size: " + markers.length);
-              // console.log(e);
-              removeMarker(e.target.options._id);
+            });                                   // have to add 'click' action
 
-            });
-
-        // map.addLayer(marker);
-
-            markersGroupNew.addLayer(marker);
-
-            // markers.push(marker);
-            // markers[marker.options._id] = marker;
-             // console.log(markers[marker.options._id]);
-
-            map.addLayer(markersGroupNew);
-
-
-
-
-
-            // console.log(m);
-            
-
-            // var lat = m.location.coordinates[1];
-            // var lng = m.location.coordinates[0];
-
-            // var marker = new L.Marker([lat, lng], {
-            //   _id: m._id,
-            //   icon: activeIcon
-            // }).on('click', function(e) {
-            //   Session.set('location', [lng, lat]);
-            //   console.log("Total markers array size: " + markers.length);
-
-            // });
-
-            // // insideMarkers.push(marker);
-            // insideMarkers[marker.options._id] = marker;
-
-        
+            insideMarkers.push(marker);
           });
 
-          // diffMarkers = _.difference(markers, insideMarkers);
-          // console.log("Total markers to hide: " + diffMarkers.length);          
-          // diffMarkers = []
+          console.log("insideMarkers.length: " + insideMarkers.length);
 
-          // console.log("Markers inside circle: " + insideMarkers.length);
-          // insideMarkers = []
+          markersGroup.clearLayers(markers);
+          markersGroup.addLayers(insideMarkers);
+          map.addLayer(markersGroup);
 
 
         }
 
-      // }
+        // if(location) {
 
+          // var nearMarkers = allMarkers.find({
+          //   location: {
+          //     $near: {
+          //       $geometry: {
+          //         type: "Point",
+          //         coordinates: location
+          //       },
+          //       $maxDistance: 100
+          //     }
+          //   }
+          // });
+
+          // console.log("Total near markers " + nearMarkers.count());
+
+        //   nearMarkers.forEach(function(m) {
+        //     var lat = m.location.coordinates[1];
+        //     var lng = m.location.coordinates[0];
+
+        //     var marker = new L.Marker([lat, lng], {
+        //       _id: m._id,
+        //       icon: activeIcon
+        //     }).on('click', function(e) {
+        //       Session.set('location', [lng, lat]);
+        //       markersGroup.clearLayers(insideMarkers);
+        //     });
+
+        //     insideMarkers.push(marker);
+        //   });
+
+        //   markersGroup.addLayers(insideMarkers);
+
+
+
+
+        // }
     });
 
-    Deps.autorun(function() {
-
-      if(Session.get('clear')){
-
-        console.log(Session.get('clear'));
-
-        markersGroup = L.markerClusterGroup({
-          maxClusterRadius: 100,
-          spiderfyOnMaxZoom: true,
-          showCoverageOnHover: false,
-          zoomToBoundsOnClick: true
-        });
-
-        var activeIcon;
-
-        activeIcon = L.icon({
-          iconUrl: "packages/leaflet/images/marker-icon.png",
-          shadowUrl: "packages/leaflet/images/marker-shadow.png",
-          iconAnchor: [16, 37]
-        });
-
-        var clearMarkers = allMarkers.find({});
-        
-
-        clearMarkers.forEach(function(m) {
-
-          var lat = m.location.coordinates[1];
-          var lng = m.location.coordinates[0];
-
-          var marker = new L.Marker([lat, lng], {
-            _id: m._id,
-            icon: activeIcon
-          }).on('click', function(e) {
-            Session.set('location', [lng, lat]);
-            map.panTo(e.target.getLatLng());
-            removeMarker(e.target.options._id);
-
-          });
-
-          markersGroup.addLayer(marker);
-          map.addLayer(markersGroup);
-        });
-
-        
-
-      } else {
-
-        Session.set('clear', false);
-
-      }
-      
-
-    });
   });
 
 }
@@ -315,5 +268,9 @@ if (Meteor.isServer) {
     // code to run on server at startup
 
     allMarkers._ensureIndex({location: "2dsphere"});
+
+    Meteor.publish('markers', function(){
+        return allMarkers.find({});
+    });
   });
 }
