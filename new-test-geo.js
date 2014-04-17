@@ -15,6 +15,7 @@ if (Meteor.isClient) {
       path: '/',
       template: 'map',
       before: function() {
+        NProgress.configure({ showSpinner: false });
         var handle = Meteor.subscribe('markers');
         if(handle.ready()) {
           NProgress.done();
@@ -46,7 +47,7 @@ if (Meteor.isClient) {
 
     $(window).resize(function () {
       var h = $(window).height();
-      var offsetTop = 50;
+      var offsetTop = 120;
 
       $('#map_canvas').css('height', (h - offsetTop));
 
@@ -117,6 +118,9 @@ if (Meteor.isClient) {
 
     markersGroup.addLayers(markers);
     map.addLayer(markersGroup);
+
+    Session.set('radius', 100);
+    Session.set('location', undefined);
   },
 
   "click #100m": function(e, t) {
@@ -133,9 +137,23 @@ if (Meteor.isClient) {
   }
 });
 
+  Template.map.helpers({
+    radius100m: function() {
+      return Session.equals("radius", 100);
+    },
+    radius500m: function() {
+      return Session.equals("radius", 500);
+    },
+    radius1000m: function() {
+      return Session.equals("radius", 1000);
+    }
+  });
+
   Meteor.startup(function() {
     // var radius = Session.get('radius') ? Session.get('radius') : 100 ;
     // var location = null;
+
+    Session.set('radius', 100);
 
     Deps.autorun(function() {
 

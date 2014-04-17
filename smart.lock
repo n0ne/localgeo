@@ -3,7 +3,8 @@
   "dependencies": {
     "basePackages": {
       "leaflet": {},
-      "iron-router": {}
+      "iron-router": {},
+      "less-bootstrap-3": {}
     },
     "packages": {
       "leaflet": {
@@ -15,6 +16,11 @@
         "git": "https://github.com/EventedMind/iron-router.git",
         "tag": "v0.7.0",
         "commit": "05f34bc48c4cad9fdaa366c1ddcabe6980232ece"
+      },
+      "less-bootstrap-3": {
+        "git": "https://github.com/DerMambo/less-bootstrap-3.git",
+        "tag": "v0.0.1",
+        "commit": "1321ac0ebc809bc354186b96f4c28b7042e38507"
       },
       "blaze-layout": {
         "git": "https://github.com/EventedMind/blaze-layout.git",

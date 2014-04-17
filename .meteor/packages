@@ -7,3 +7,5 @@ standard-app-packages
 insecure
 leaflet
 iron-router
+less
+less-bootstrap-3

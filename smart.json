@@ -1,6 +1,7 @@
 {
   "packages": {
     "leaflet": {},
-    "iron-router": {}
+    "iron-router": {},
+    "less-bootstrap-3": {}
   }
 }
