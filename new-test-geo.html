@@ -5,32 +5,3 @@
 <body>
   {{> yield}}
 </body>
-
-<template name="map">
-
-	<div class="container-full">
-		<div class="row" style="text-align: center;">
-			<h3>Meteor.js, minimongo local geo search</h3>
-		</div>
-		<div class="row" style="margin-bottom: 10px;">
-			<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-				<label>Radius: </label>
-
-				<a href="#" id="100m"  class="btn btn-sm btn-default {{#if radius100m}} disabled {{/if}}">100m</a>
-				<a href="#" id="500m"  class="btn btn-sm btn-default {{#if radius500m}} disabled {{/if}}">500m</a>
-				<a href="#" id="1000m" class="btn btn-sm btn-default {{#if radius1000m}} disabled {{/if}}">1000m</a>
-			</div>
-			<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: right; ">
-				<label>Reset all markers</label>
-				<a href="#" id="clear" class="btn btn-sm btn-default">Reset</a>
-			</div>
-		</div>
-		<div class="row">
-			<div id="map">
-		    	<div id="map_canvas"></div>
-		  	</div>	
-		</div>
-	  	
-	</div>
-	
-</template>
