@@ -1,7 +1,6 @@
 Meteor.startup(function () {
 
-	if (!allMarkers.find().count())
-      data.forEach(function (x) { allMarkers.insert(x); });
+	Apm.connect('TQSLTNwMmakPkXqzd', '5ddb60d7-cf61-442e-a882-a8176e058afa');
 
 	allMarkers._ensureIndex({location: "2dsphere"});
 

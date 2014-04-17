@@ -2,6 +2,7 @@
   "packages": {
     "leaflet": {},
     "iron-router": {},
-    "less-bootstrap-3": {}
+    "less-bootstrap-3": {},
+    "apm": {}
   }
 }
